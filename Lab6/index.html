@@ -1,0 +1,139 @@
+<html>
+    <head>
+        <title>Memoria</title>
+        <link rel= "stylesheet" href= "estilo.css">
+    </head>
+    <body>
+        <div id="root"></div>
+        <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script type="text/babel">
+            const Imagenes = [
+                { "src": "Primero.jpg", matched: false, turned:false},
+                { "src": "Segundo.jpg", matched: false, turned:false },
+                { "src": "Tercero.jpg", matched: false, turned:false },
+                { "src": "Cuarto.jpg", matched: false, turned:false },
+                { "src": "Quinto.jpg", matched: false, turned:false },
+                { "src": "Sexto.jpg", matched: false, turned:false }
+            ]  
+
+            const App = () => {
+                const [tarjetas, settarjetas] = React.useState([])
+                const [turnos, setturnos] = React.useState(0)
+                const [choiceOne, setChoiceOne] = React.useState(null)
+                const [choiceTwo, setChoiceTwo] = React.useState(null)
+                const [win, setWin] = React.useState(0)
+
+                const shuffletarjetas = () => {
+                    const shuffledtarjetas = [...Imagenes, ...Imagenes]
+                        .sort(() => Math.random() - 0.5)
+                        .map ((card) => ({ ...card, id: Math.random() }))
+                    
+                    setChoiceOne(null)
+                    setChoiceTwo(null)
+                    settarjetas(shuffledtarjetas)
+                    setturnos(0)
+                    setWin(0)
+                }
+                
+                function handleClick(card) { 
+                    choiceOne ? setChoiceTwo(card) : setChoiceOne(card)
+                    card.turned = true
+                }
+
+                React.useEffect(() => {
+                    if(choiceOne && choiceTwo){
+                        if(choiceOne.src === choiceTwo.src){
+
+                            settarjetas( verCarta => {
+                                return verCarta.map( card => {
+                                    if(card.src === choiceOne.src){
+                                        return {...card, match : true}
+                                    }
+                                    else{
+                                        return card
+                                    }
+                                })
+                            })
+
+                            resetturnos()
+                        }else{
+                            choiceOne.turned = false
+                            choiceTwo.turned = false
+                            setTimeout( () => resetturnos(), 1000)
+                        }
+                    }
+                }, [choiceOne,choiceTwo])
+
+
+                var winner = false
+
+                const resetturnos = () => {
+                    setChoiceOne(null)
+                    setChoiceTwo(null)
+                    setturnos(preturnos => preturnos + 1)
+                }
+
+                React.useEffect(() => {
+                    for( const card of tarjetas){
+                        if(card.match===true){
+                            setWin(prewin => prewin + 1)
+                        }
+                    }
+                
+                    if(win === 30){
+                        winner=true
+                        document.getElementById("win").className = "banner"
+                    }
+                    else{
+                        winner=false
+                        document.getElementById("win").className = "none"
+                    }
+                }, [tarjetas])
+
+
+                return (
+                <div className="App">
+                    <h1>Memoria</h1>
+                        <div className="card-grid">
+                        {tarjetas.map( card => (
+                            
+                            <div className="card" key={card.id}>
+                                <div className={card.turned ? "turned" : ""}>
+                                    <img className="front" src={card.src} alt="card front"/>
+                                    <img className="back" src="Fondo.jpg" alt="card back"  onClick={()=>{handleClick(card)}}/>
+                                </div>
+                            </div>
+
+                        ))}
+                        <div className="none" id="win">
+                            <h1>Ganaste</h1>
+                            
+                        </div>
+                    </div>
+                    <div className="footer">
+                        <button onClick={shuffletarjetas}>Nuevo Juego</button>
+                        <p className="foot_element">Movimientos: {turnos}</p>
+                    </div>
+                    
+
+                    
+                </div>
+
+                )
+            }
+
+            ReactDOM.render(
+                <App/>,
+                document.getElementById('root')
+            );
+
+
+
+        
+        </script>
+    </body>
+
+</html>
+
